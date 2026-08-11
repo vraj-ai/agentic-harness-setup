@@ -51,6 +51,8 @@ plus the official file-defined subagent tool.
 | council-kimi | openrouter/moonshotai/kimi-k3 | bash |
 | council-qwen | openrouter/qwen/qwen3.8-max | bash |
 | council-sol | openai/gpt-5.6-sol | bash |
+| council-gemini | openrouter/google/gemini-3.6-flash | bash |
+| council-deepseek | openrouter/deepseek/deepseek-v4-flash-0731 | bash |
 | council | (default model) | bash |
 | goals | (default model) | bash, edit |
 

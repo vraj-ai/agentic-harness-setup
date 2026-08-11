@@ -73,11 +73,27 @@ See `prime-agent/extensions/subagent/README.md` for details and caveats.
 
 Ported from `opencode/agent/*.md` (system prompts preserved verbatim):
 `contributor`, `council`, `council-adversary`, `council-glm`, `council-grok`,
-`council-kimi`, `council-qwen`, `council-sol`, `goals`.
+`council-kimi`, `council-qwen`, `council-sol`, `council-gemini`,
+`council-deepseek`, `goals`.
 
 ## Notes
 
 - No secrets are stored here — only agent definitions, prompts, and extension
   code. Keep API keys out (they live in the local auth stores).
 - The OpenCode setup here mirrors `~/Work/skills/opencode`; the Prime Agent
-  setup mirrors `~/.prime/agent`. Use the scripts to keep all three in sync.
+  setup mirrors `~/.prime/agent`. The council includes cost-aware Gemini and
+  DeepSeek profiles, and the setup scripts keep both harnesses in sync.
+
+## Consolidated Prime Agent (pi) setup
+
+`pi/` is the full Prime Agent configuration previously hosted as the
+standalone `vraj-ai/Pi-Setup` repo (now folded into this repo). It contains:
+
+- `extensions/` — custom Prime Agent extensions (subagents, background-terminals,
+  workflow, file-search, firecrawl-search, git-info, ask-user, copy-all,
+  model-info, shared, summaries, ui-customization)
+- `skills/` — custom skills (background-terminals, subagents, terse-output)
+- `themes/` — UI themes (github-dark-default, vraj-ink)
+- `keybindings.json`, `settings.example.json`, install scripts, docs, and more
+
+See `pi/README.md` and `pi/SETUP.md` for details.

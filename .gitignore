@@ -12,3 +12,7 @@ Thumbs.db
 .env
 secrets/
 *.local.md
+
+# pi setup deps
+pi/**/node_modules/
+pi/package-lock.json
