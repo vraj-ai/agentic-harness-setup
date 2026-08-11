@@ -16,6 +16,7 @@ agentic-harness-setup/
 ├── opencode/                   # OpenCode setup (from ~/Work/skills/opencode)
 │   ├── agent/                  #   subagent profile definitions (*.md)
 │   └── command/                #   slash commands
+├── claude-code/agents/         # Claude Code agents (moved from pi/.claude/agents)
 ├── prime-agent/                # Prime Agent harness (from ~/.prime/agent)
 │   ├── extensions/subagent/    #   @-mention subagent extension + tool
 │   ├── agents/                 #   invocable agent profiles (ported from opencode)
