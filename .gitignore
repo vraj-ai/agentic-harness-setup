@@ -1,0 +1,14 @@
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+.idea/
+.vscode/
+
+# Not synced (secrets / local-only)
+.env
+secrets/
+*.local.md
