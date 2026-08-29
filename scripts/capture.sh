@@ -59,7 +59,6 @@ fi
 
 if [ -d "$PA_AGENTS_SRC" ]; then
   mkdir -p "$REPO_DIR/prime-agent/agents"
-  cp -R "$REPO_DIR/prime-agent/agents/." "$REPO_DIR/prime-agent/agents/" 2>/dev/null || true
   cp -R "$PA_AGENTS_SRC/." "$REPO_DIR/prime-agent/agents/"
   echo "  [ok] $PA_AGENTS_SRC -> prime-agent/agents/"
 fi
