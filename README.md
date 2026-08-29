@@ -1,100 +1,121 @@
 # agentic-harness-setup
 
-Versioned, source-of-truth harness setup for the AI coding agents used on this
-machine. It centralises the **OpenCode** subagent setup and the **Prime Agent**
-harness (the OpenCode-style `@`-mention subagent extension + agent profiles +
-workflow prompts), plus sync scripts so both live installs stay up to date.
+Versioned machine harness for the coding agents on this account. It snapshots
+the **omp Roles**, **OpenCode** profiles, and the **Prime Agent** `@`-mention
+harness, plus sync scripts so live installs stay aligned with
+[vraj-ai/skills](https://github.com/vraj-ai/skills).
 
-Current version: **0.1.0** (see [`VERSION`](VERSION)).
+Current version: **0.3.0** (see [`VERSION`](VERSION)).
+
+Skills stay portable. This repo is the machine overlay: Role files, OpenCode
+agents, Prime Agent extensions. Workflow skills themselves live in `vskills`.
 
 ## Layout
 
 ```
 agentic-harness-setup/
-├── VERSION                     # semantic version of this harness
+├── VERSION
 ├── README.md
-├── opencode/                   # OpenCode setup (from ~/Work/skills/opencode)
-│   ├── agent/                  #   subagent profile definitions (*.md)
-│   └── command/                #   slash commands
-├── claude-code/agents/         # Claude Code agents (moved from pi/.claude/agents)
-├── prime-agent/                # Prime Agent harness (from ~/.prime/agent)
-│   ├── extensions/subagent/    #   @-mention subagent extension + tool
-│   ├── agents/                 #   invocable agent profiles (ported from opencode)
-│   └── prompts/                #   workflow prompt templates (/implement etc.)
+├── omp/agent/              # Invocation + Worker Role templates
+├── opencode/               # OpenCode agents + slash commands
+│   ├── agent/
+│   └── command/
+├── claude-code/agents/
+├── prime-agent/            # Prime Agent @-mention harness
+│   ├── extensions/subagent/
+│   ├── agents/
+│   └── prompts/
+├── pi/                     # folded Prime Agent (Pi-Setup) tree
 └── scripts/
-    ├── sync.sh                 # repo -> live installs (deploy)
-    └── capture.sh              # live installs -> repo (pull edits back)
+    ├── sync.sh             # repo -> live installs
+    └── capture.sh          # skills/live -> repo
 ```
+
+## omp Roles
+
+Copied from `vraj-ai/skills` `harness/omp/agent/`. Model and effort are unset;
+assign those in omp.
+
+**Invocation** (autoload the skill of the same name): `grill`, `issues`, `ship`,
+`snapshot`, `goals`.
+
+**Workers** (never spawn): `researcher`, `builder`, `reviewer`, `adversary`,
+`small-task`.
+
+Install live:
+
+```bash
+./scripts/sync.sh
+```
+
+That writes `omp/agent/` into `~/.omp/agent/agents/` (or `$OMP_AGENTS_DIR`).
+Reload the omp Agents tab (Ctrl+R). `/setup-vskills` in the skills repo does
+the same after it asks which harness you are on.
+
+## OpenCode
+
+Profiles live here under `opencode/`, matching `vraj-ai/skills`
+`harness/opencode/`. `sync.sh` installs them to `~/.config/opencode/` (or
+`$OPENCODE_CONFIG_DIR`), not into a top-level `skills/opencode/` tree. That
+path is gone.
+
+Included: `goals`, `council`, contributor, cost-aware Gemini/DeepSeek, council
+members, adversary, `/goal`.
 
 ## Keep it up to date
 
-The repo is the **source of truth**. Two directions:
+The skills repo is the template source for omp Roles and OpenCode profiles.
+This repo versions the snapshot and deploys it.
 
-- **Deploy repo → live installs** (after a clone/update or version bump):
+- **Repo → live** (after clone or bump):
+
   ```bash
   ./scripts/sync.sh
   ```
-  This copies:
-  - `opencode/` → `~/Work/skills/opencode`
+
+  Copies:
+
+  - `opencode/` → `~/.config/opencode` (and `~/Work/skills/harness/opencode` if that clone exists)
+  - `omp/agent/` → `~/.omp/agent/agents` (and `~/Work/skills/harness/omp/agent` if present)
   - `prime-agent/extensions/subagent` → `~/.prime/agent/extensions/subagent`
   - `prime-agent/agents` → `~/.prime/agent/agents`
   - `prime-agent/prompts` → `~/.prime/agent/prompts`
 
-  After syncing the Prime Agent pieces, restart `prime-agent` or run `/reload`.
+  Restart omp, OpenCode, or Prime Agent (`/reload`).
 
-- **Pull live edits back → repo** (before committing changes you made directly
-  in the live installs):
+- **Skills or live → repo** (before you commit):
+
   ```bash
   ./scripts/capture.sh
   ```
 
+  Prefers `~/Work/skills/harness/` when it exists, else the live config dirs.
+
 ### Versioning
 
-- Bump `VERSION` whenever you change the harness (e.g. new agents, changed
-  prompts, extension tweaks). Keep it in sync with both `opencode/` and
-  `prime-agent/` so a single tag describes the whole setup.
-- Suggest following [SemVer](https://semver.org/): bump MAJOR for breaking
-  changes, MINOR for new features, PATCH for fixes.
+Bump `VERSION` when agents, Roles, or scripts change. SemVer: MAJOR breaking,
+MINOR features, PATCH fixes.
 
 ## Prime Agent `@`-mention subagents
 
-Installed globally by this repo (via `~/.prime/agent/extensions/subagent`):
+Installed via `~/.prime/agent/extensions/subagent`:
 
-- Type `@` in the prime-agent composer for an autocomplete picker of every
-  agent in `~/.prime/agent/agents/*.md`.
-- `@name <task>` delegates `<task>` to that agent (isolated subprocess, result
-  relayed verbatim).
-- `@a @b <task>` runs several agents in parallel.
-- Plain delegation also works ("use contributor to …"), plus `/implement`,
-  `/scout-and-plan`, `/implement-and-review` workflow templates.
+- Type `@` for an autocomplete picker of `~/.prime/agent/agents/*.md`.
+- `@name <task>` delegates to that agent.
+- `@a @b <task>` runs several in parallel.
 
-See `prime-agent/extensions/subagent/README.md` for details and caveats.
+See `prime-agent/extensions/subagent/README.md`.
 
-## Agents
-
-Ported from `opencode/agent/*.md` (system prompts preserved verbatim):
-`contributor`, `council`, `council-adversary`, `council-glm`, `council-grok`,
-`council-kimi`, `council-qwen`, `council-sol`, `council-gemini`,
-`council-deepseek`, `goals`.
+Prime Agent still ships the older council/contributor set. omp is the author's
+client for `/grill` → `/issues` → `/ship` or `/goals` → `/snapshot`.
 
 ## Notes
 
-- No secrets are stored here — only agent definitions, prompts, and extension
-  code. Keep API keys out (they live in the local auth stores).
-- The OpenCode setup here mirrors `~/Work/skills/opencode`; the Prime Agent
-  setup mirrors `~/.prime/agent`. The council includes cost-aware Gemini and
-  DeepSeek profiles, and the setup scripts keep both harnesses in sync.
+- No secrets. Keys stay in local auth stores.
+- Do not treat `smol` / `task` / `advisor` as worker identities. Those are omp
+  model aliases. Spawn the named Worker Roles instead.
 
 ## Consolidated Prime Agent (pi) setup
 
-`pi/` is the full Prime Agent configuration previously hosted as the
-standalone `vraj-ai/Pi-Setup` repo (now folded into this repo). It contains:
-
-- `extensions/` — custom Prime Agent extensions (subagents, background-terminals,
-  workflow, file-search, firecrawl-search, git-info, ask-user, copy-all,
-  model-info, shared, summaries, ui-customization)
-- `skills/` — custom skills (background-terminals, subagents, terse-output)
-- `themes/` — UI themes (github-dark-default, vraj-ink)
-- `keybindings.json`, `settings.example.json`, install scripts, docs, and more
-
-See `pi/README.md` and `pi/SETUP.md` for details.
+`pi/` is the full Prime Agent configuration previously hosted as
+`vraj-ai/Pi-Setup`. See `pi/README.md` and `pi/SETUP.md`.

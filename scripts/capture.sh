@@ -1,32 +1,52 @@
 #!/usr/bin/env bash
-# =============================================================================
-# agentic-harness-setup  —  capture.sh (live installs -> repo)
+# agentic-harness-setup — capture.sh (live installs / skills -> repo)
 #
-# Pulls the CURRENT live setups back into this repository so edits made
-# directly in the live installs (e.g. ~/.prime/agent/agents/*.md) are not
-# lost. Run this before committing if you changed the live files.
-#
-# Run:  ./scripts/capture.sh
-# =============================================================================
+# Prefer ~/Work/skills/harness when present (vskills is the template source).
+# Fall back to live ~/.config/opencode and ~/.omp/agent/agents.
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="$(cat "$REPO_DIR/VERSION")"
 
-echo "agentic-harness-setup v$VERSION — capturing live installs -> repo"
+echo "agentic-harness-setup v$VERSION — capturing into repo"
 
-# --- OpenCode setup ----------------------------------------------------------
-OPENCODE_SRC="$HOME/Work/skills/opencode"
-if [ -d "$OPENCODE_SRC/agent" ]; then
+SKILLS_OC="$HOME/Work/skills/harness/opencode"
+OPENCODE_LIVE="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
+if [ -d "$SKILLS_OC/agent" ]; then
+  OPENCODE_SRC="$SKILLS_OC"
+elif [ -d "$OPENCODE_LIVE/agent" ]; then
+  OPENCODE_SRC="$OPENCODE_LIVE"
+else
+  OPENCODE_SRC=""
+fi
+
+if [ -n "$OPENCODE_SRC" ]; then
   mkdir -p "$REPO_DIR/opencode/agent" "$REPO_DIR/opencode/command"
   cp -R "$OPENCODE_SRC/agent/." "$REPO_DIR/opencode/agent/"
   [ -d "$OPENCODE_SRC/command" ] && cp -R "$OPENCODE_SRC/command/." "$REPO_DIR/opencode/command/"
   echo "  [ok] $OPENCODE_SRC -> opencode/"
 else
-  echo "  [skip] $OPENCODE_SRC not found"
+  echo "  [skip] no OpenCode templates found"
 fi
 
-# --- Prime Agent harness -----------------------------------------------------
+SKILLS_OMP="$HOME/Work/skills/harness/omp/agent"
+OMP_LIVE="${OMP_AGENTS_DIR:-$HOME/.omp/agent/agents}"
+if [ -d "$SKILLS_OMP" ]; then
+  OMP_SRC="$SKILLS_OMP"
+elif [ -d "$OMP_LIVE" ]; then
+  OMP_SRC="$OMP_LIVE"
+else
+  OMP_SRC=""
+fi
+
+if [ -n "$OMP_SRC" ]; then
+  mkdir -p "$REPO_DIR/omp/agent"
+  cp -R "$OMP_SRC/." "$REPO_DIR/omp/agent/"
+  echo "  [ok] $OMP_SRC -> omp/agent/"
+else
+  echo "  [skip] no omp Role templates found"
+fi
+
 PA_EXT_SRC="$HOME/.prime/agent/extensions/subagent"
 PA_AGENTS_SRC="$HOME/.prime/agent/agents"
 PA_PROMPTS_SRC="$HOME/.prime/agent/prompts"
@@ -39,6 +59,7 @@ fi
 
 if [ -d "$PA_AGENTS_SRC" ]; then
   mkdir -p "$REPO_DIR/prime-agent/agents"
+  cp -R "$REPO_DIR/prime-agent/agents/." "$REPO_DIR/prime-agent/agents/" 2>/dev/null || true
   cp -R "$PA_AGENTS_SRC/." "$REPO_DIR/prime-agent/agents/"
   echo "  [ok] $PA_AGENTS_SRC -> prime-agent/agents/"
 fi
@@ -49,4 +70,4 @@ if [ -d "$PA_PROMPTS_SRC" ]; then
   echo "  [ok] $PA_PROMPTS_SRC -> prime-agent/prompts/"
 fi
 
-echo "Captured. Review the diff and commit a new version bump if needed."
+echo "Captured. Review the diff and bump VERSION if you commit."
