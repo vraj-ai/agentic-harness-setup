@@ -1,9 +1,0 @@
-{
-  "name": "pi-interactive-subagents-herdr",
-  "private": true,
-  "type": "module",
-  "description": "Interactive subagents for pi (Herdr pane backend). Ported from amosblomqvist/pi-interactive-subagents v3.7.2 (tmux-only) — see herdr.ts mapping notes.",
-  "pi": {
-    "extensions": ["./index.ts"]
-  }
-}

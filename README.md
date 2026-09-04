@@ -5,7 +5,7 @@ the **omp Roles**, **OpenCode** profiles, and the **Prime Agent** `@`-mention
 harness, plus sync scripts so live installs stay aligned with
 [vraj-ai/skills](https://github.com/vraj-ai/skills).
 
-Current version: **0.5.0** (see [`VERSION`](VERSION)).
+Current version: **0.3.0** (see [`VERSION`](VERSION)).
 
 Skills stay portable. This repo is the machine overlay: Role files, OpenCode
 agents, Prime Agent extensions. Workflow skills themselves live in `vskills`.
@@ -25,8 +25,7 @@ agentic-harness-setup/
 │   ├── extensions/subagent/
 │   ├── agents/
 │   └── prompts/
-├── pi/                     # Vraj Pi; launched with `pi`
-├── pitest/                 # isolated amosblomqvist pi-config + learn; launched with `pitest`
+├── pi/                     # folded Prime Agent (Pi-Setup) tree
 └── scripts/
     ├── sync.sh             # repo -> live installs
     └── capture.sh          # skills/live -> repo
@@ -116,10 +115,7 @@ client for `/grill` → `/issues` → `/ship` or `/goals` → `/snapshot`.
 - Do not treat `smol` / `task` / `advisor` as worker identities. Those are omp
   model aliases. Spawn the named Worker Roles instead.
 
-## Pi configurations
+## Consolidated Prime Agent (pi) setup
 
 `pi/` is the full Prime Agent configuration previously hosted as
 `vraj-ai/Pi-Setup`. See `pi/README.md` and `pi/SETUP.md`.
-
-`pitest/` combines `amosblomqvist/pi-config` and `amosblomqvist/learn` in an
-isolated config. Use `pi` for the existing setup and `pitest` for this test setup.
