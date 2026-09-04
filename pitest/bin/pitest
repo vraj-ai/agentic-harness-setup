@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+set -eu
+
+SOURCE=$0
+while [ -L "$SOURCE" ]; do
+  DIR=$(CDPATH= cd -- "$(dirname -- "$SOURCE")" && pwd)
+  SOURCE=$(readlink "$SOURCE")
+  case "$SOURCE" in /*) ;; *) SOURCE="$DIR/$SOURCE" ;; esac
+done
+ROOT=$(CDPATH= cd -- "$(dirname -- "$SOURCE")/.." && pwd)
+export PI_CODING_AGENT_DIR="$ROOT"
+exec pi "$@"
