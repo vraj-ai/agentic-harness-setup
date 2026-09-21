@@ -10,7 +10,7 @@
  * - bg_kill: SIGTERM→SIGKILL the whole process tree; returns final state.
  *
  * While ≥1 process runs, a one-line widget above the editor shows
- * "N background terminal(s) running • /ps to view". `/ps` opens a two-stage
+ * "N background terminal(s) running · /ps to view". `/ps` opens a two-stage
  * full-screen overlay (list → read-only detail with stdout/stderr toggle).
  *
  * Architecture: Effect v4 core (manager service behind one ManagedRuntime);
@@ -27,6 +27,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { getMarkdownTheme } from "@earendil-works/pi-coding-agent";
 import { Markdown, Text } from "@earendil-works/pi-tui";
+import { glyphs, separator } from "../shared/style.ts";
 import { Type } from "typebox";
 import type { TerminalSnapshot } from "./src/domain.ts";
 import { TerminalManager, type TerminalManagerShape } from "./src/manager.ts";
@@ -101,12 +102,12 @@ export default function (pi: ExtensionAPI) {
       }
       ui.setWidget(WIDGET_KEY, (_tui, theme) => {
         const line =
-          theme.fg("warning", "■ ") +
+          theme.fg("warning", `${glyphs.running} `) +
           theme.fg(
             "text",
             `${running} background terminal${running === 1 ? "" : "s"} running`,
           ) +
-          theme.fg("dim", " • ") +
+          theme.fg("dim", separator) +
           theme.fg("accent", "/ps") +
           theme.fg("dim", " to view");
         return { render: () => [line], invalidate: () => {} };
@@ -372,10 +373,10 @@ export default function (pi: ExtensionAPI) {
       const failed = details.status === "failed";
       const killed = details.status === "killed";
       const icon = failed
-        ? theme.fg("error", "x")
+        ? theme.fg("error", glyphs.failed)
         : killed
-          ? theme.fg("muted", "■")
-          : theme.fg("success", "■");
+          ? theme.fg("muted", glyphs.killed)
+          : theme.fg("success", glyphs.done);
       const how = killed
         ? "killed"
         : (details.signal ?? `exit ${details.exitCode ?? "?"}`);

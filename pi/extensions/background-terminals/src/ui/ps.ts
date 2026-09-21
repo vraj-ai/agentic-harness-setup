@@ -16,6 +16,7 @@ import { formatSize } from "@earendil-works/pi-coding-agent";
 import type { Component, TUI } from "@earendil-works/pi-tui";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { formatElapsed, formatExit, type TerminalSnapshot } from "../domain.ts";
+import { BOX, glyphOf, marker, separator } from "../../../shared/style.ts";
 import type { TerminalReadModel } from "../manager.ts";
 import { createOutputLineCache, sanitizeText } from "./output-view.ts";
 
@@ -33,16 +34,15 @@ function configuredKeys(
 }
 
 function statusGlyph(snap: TerminalSnapshot, theme: Theme) {
-  switch (snap.status) {
-    case "running":
-      return theme.fg("warning", "■");
-    case "done":
-      return theme.fg("success", "■");
-    case "failed":
-      return theme.fg("error", "■");
-    case "killed":
-      return theme.fg("muted", "■");
-  }
+  const color =
+    snap.status === "done"
+      ? "success"
+      : snap.status === "failed"
+        ? "error"
+        : snap.status === "killed"
+          ? "muted"
+          : "warning";
+  return theme.fg(color, glyphOf(snap.status));
 }
 
 function statusWord(snap: TerminalSnapshot, theme: Theme) {
@@ -220,9 +220,9 @@ class TerminalDashboard implements Component {
       : "";
     const labelWidth = visibleWidth(label);
     return (
-      theme.fg("border", "─") +
+      theme.fg("border", BOX.h) +
       (label ? theme.fg("text", label) : "") +
-      theme.fg("border", "─".repeat(Math.max(0, width - 1 - labelWidth)))
+      theme.fg("border", BOX.h.repeat(Math.max(0, width - 1 - labelWidth)))
     );
   }
 
@@ -260,16 +260,16 @@ class TerminalDashboard implements Component {
     // Top border with panel title
     const running = terminals.filter((s) => s.status === "running").length;
     lines.push(
-      theme.fg("border", "╭") +
+      theme.fg("border", BOX.tl) +
         this.borderSegment(
           innerWidth,
           `terminals · ${running} running / ${terminals.length}`,
         ) +
-        theme.fg("border", "╮"),
+        theme.fg("border", BOX.tr),
     );
 
     // Rows
-    const divider = theme.fg("border", "│");
+    const divider = theme.fg("border", BOX.v);
     const rowLines = this.renderRows(terminals, innerWidth, bodyHeight);
     for (let i = 0; i < bodyHeight; i++) {
       lines.push(divider + this.pad(rowLines[i] ?? "", innerWidth) + divider);
@@ -277,9 +277,9 @@ class TerminalDashboard implements Component {
 
     // Bottom border
     lines.push(
-      theme.fg("border", "╰") +
-        theme.fg("border", "─".repeat(Math.max(0, innerWidth))) +
-        theme.fg("border", "╯"),
+      theme.fg("border", BOX.bl) +
+        theme.fg("border", BOX.h.repeat(Math.max(0, innerWidth))) +
+        theme.fg("border", BOX.br),
     );
 
     // Hints
@@ -319,12 +319,12 @@ class TerminalDashboard implements Component {
       const index = start + i;
       const isSelected = index === this.selection.index;
 
-      // Left: marker, status square, title, dim id
-      const marker = isSelected ? theme.fg("accent", "❯") : " ";
+      // Left: marker, status glyph, title, dim id
+      const rowMark = isSelected ? theme.fg("accent", marker) : " ";
       const title = isSelected
         ? theme.fg("accent", oneLine(snap.title))
         : theme.fg("text", oneLine(snap.title));
-      const left = ` ${marker} ${statusGlyph(snap, theme)} ${title} ${theme.fg("dim", snap.id)}`;
+      const left = ` ${rowMark} ${statusGlyph(snap, theme)} ${title} ${theme.fg("dim", snap.id)}`;
 
       // Right: pid · elapsed · exit/status
       const dot = theme.fg("dim", " · ");
@@ -499,14 +499,19 @@ class TerminalDetailView implements Component {
 
   render(width: number): string[] {
     const theme = this.theme;
-    const border = theme.fg("borderAccent", "─".repeat(Math.max(1, width)));
+    const edge = (top: boolean) =>
+      theme.fg(
+        "borderAccent",
+        `${top ? BOX.tl : BOX.bl}${BOX.h.repeat(Math.max(1, width - 2))}${top ? BOX.tr : BOX.br}`,
+      );
+    const border = edge(true);
     const lines: string[] = [];
     const snap = this.snap();
 
     if (!snap) {
       lines.push(border);
       lines.push(theme.fg("dim", `${this.id} is no longer tracked`));
-      lines.push(border);
+      lines.push(edge(false));
       return lines;
     }
 
@@ -529,9 +534,6 @@ class TerminalDetailView implements Component {
         width,
       ),
     );
-    lines.push(border);
-
-    // Stream tab line: which stream is active, both sizes.
     const active = this.stream;
     const viewData = active === "stdout" ? snap.stdout : snap.stderr;
     const tab = (name: "stdout" | "stderr", size: number) =>
@@ -540,7 +542,7 @@ class TerminalDetailView implements Component {
         : theme.fg("dim", `${name} (${formatSize(size)})`);
     lines.push(
       truncateToWidth(
-        `  ${tab("stdout", snap.stdout.totalBytes)}${theme.fg("dim", " | ")}${tab("stderr", snap.stderr.totalBytes)}${theme.fg("dim", "  — t to switch")}`,
+        `  ${tab("stdout", snap.stdout.totalBytes)}${theme.fg("dim", separator)}${tab("stderr", snap.stderr.totalBytes)}${theme.fg("dim", separator)}t to switch`,
         width,
       ),
     );
@@ -569,7 +571,7 @@ class TerminalDetailView implements Component {
         truncateToWidth(
           theme.fg(
             "dim",
-            `first ${formatSize(buffer.truncatedBytes)} dropped from view — full log: ${buffer.spillPath ?? "(unavailable)"}`,
+            `first ${formatSize(buffer.truncatedBytes)} dropped from view · full log: ${buffer.spillPath ?? "(unavailable)"}`,
           ),
           width,
         ),
@@ -603,7 +605,6 @@ class TerminalDetailView implements Component {
     while (body.length < viewport) body.push("");
     lines.push(...body.slice(0, viewport));
 
-    lines.push(border);
     lines.push(
       truncateToWidth(
         theme.fg(
@@ -613,7 +614,7 @@ class TerminalDetailView implements Component {
         width,
       ),
     );
-    lines.push(border);
+    lines.push(edge(false));
     return lines;
   }
 

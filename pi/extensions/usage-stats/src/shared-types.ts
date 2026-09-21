@@ -178,7 +178,7 @@ export interface DashboardStats {
   timeSeries: TimeSeriesPoint[];
 }
 
-// --- behaviour -------------------------------------------------------------
+// --- behavior -------------------------------------------------------------
 
 export interface BehaviorOverallStats {
   messages: number;

@@ -15,7 +15,6 @@
     "amber": "#ffbd70",
     "mint": "#70efc0",
     "red": "#ff6b7a",
-    "softRed": "#ff9aa5",
     "blue": "#7cb8ff",
     "pink": "#f0a7ff"
   },
@@ -32,6 +31,10 @@
     "text": "text",
     "thinkingText": "muted",
     "selectedBg": "#111d2b",
+    "scrollbarTrack": "panel",
+    "scrollbarThumb": "dim",
+    "searchMatchBg": "amber",
+    "searchMatchText": "ink",
     "userMessageBg": "surface",
     "userMessageText": "text",
     "customMessageBg": "panel",

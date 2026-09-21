@@ -17,7 +17,6 @@
     "orange": "#ff9d3d",
     "mint": "#3ce6b0",
     "red": "#ff5d6e",
-    "softRed": "#ff96a2",
     "violet": "#a894ff",
     "pink": "#ff8fd1",
     "lime": "#a8e05f"
@@ -35,6 +34,10 @@
     "text": "text",
     "thinkingText": "muted",
     "selectedBg": "#0a3550",
+    "scrollbarTrack": "panel",
+    "scrollbarThumb": "dim",
+    "searchMatchBg": "amber",
+    "searchMatchText": "ink",
     "userMessageBg": "surface",
     "userMessageText": "text",
     "customMessageBg": "panel",

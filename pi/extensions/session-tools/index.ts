@@ -115,7 +115,7 @@ export default function sessionTools(
       ctx.ui.notify(
         safetyEnabled
           ? `Safety guard is on${safetyStrict ? " (strict: warnings block too)" : ""}`
-          : "Safety guard is OFF - destructive commands will run",
+          : "Safety guard is off · destructive commands will run",
         safetyEnabled ? "info" : "warning",
       );
     },

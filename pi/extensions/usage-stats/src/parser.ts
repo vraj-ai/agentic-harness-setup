@@ -98,7 +98,7 @@ export interface ParseResult {
   skipped: number;
 }
 
-// --- behavioural signals ---------------------------------------------------
+// --- behavioral signals ---------------------------------------------------
 
 /**
  * Deliberately small and boring. These are frustration *signals*, not a
@@ -380,7 +380,7 @@ export function parseSession(
       agentType,
     });
 
-    // Link the user message this replies to, so behaviour stats can be sliced
+    // Link the user message this replies to, so behavior stats can be sliced
     // by the model that was actually answering.
     const parentId = typeof entry.parentId === "string" ? entry.parentId : null;
     const linkTarget =

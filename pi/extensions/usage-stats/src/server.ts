@@ -33,6 +33,7 @@ import {
   type StatsContext,
 } from "./api.ts";
 import { dashboardHtml } from "./client.ts";
+import { dashboardTokens } from "./dashboard-tokens.ts";
 
 export const DEFAULT_PORT = 3847;
 const HOST = "127.0.0.1";
@@ -66,7 +67,7 @@ export function handle(
     return {
       status: 200,
       type: "text/html; charset=utf-8",
-      body: dashboardHtml(),
+      body: dashboardHtml(dashboardTokens(context.paths.agentDir)),
     };
   }
 

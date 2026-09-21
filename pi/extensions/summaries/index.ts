@@ -4,6 +4,7 @@ import type {
 } from "@earendil-works/pi-coding-agent";
 import { loadSummaryConfig, saveSummaryConfig } from "./src/config.ts";
 import { summarizeRun } from "./src/summarizer.ts";
+import { glyphs } from "../shared/style.ts";
 import {
   buildFallbackRecap,
   createRunBoundary,
@@ -50,7 +51,10 @@ export default function (pi: ExtensionAPI) {
     statusContext?.ui.setStatus(
       STATUS_KEY,
       activeSummaries.size > 0
-        ? statusContext.ui.theme.fg("muted", "✦ summarizing run…")
+        ? statusContext.ui.theme.fg(
+            "muted",
+            `${glyphs.running} summarizing run…`,
+          )
         : undefined,
     );
   };

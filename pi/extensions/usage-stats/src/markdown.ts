@@ -20,13 +20,11 @@ import type {
 } from "./shared-types.ts";
 import { RANGE_META } from "./shared-types.ts";
 import { projectLabel } from "./paths.ts";
+import { emptyReport, fmtTokens } from "../../shared/style.ts";
 
 export function formatTokens(tokens: number) {
   if (!Number.isFinite(tokens)) return "0";
-  const rounded = Math.round(tokens);
-  if (Math.abs(rounded) < 1_000) return `${rounded}`;
-  if (Math.abs(rounded) < 1_000_000) return `${(rounded / 1_000).toFixed(1)}k`;
-  return `${(rounded / 1_000_000).toFixed(2)}M`;
+  return fmtTokens(Math.round(tokens));
 }
 
 export function formatCost(cost: number) {
@@ -54,7 +52,7 @@ function table(
   headers: readonly string[],
   rows: readonly (readonly string[])[],
 ) {
-  if (rows.length === 0) return "_no data in range_";
+  if (rows.length === 0) return `_${emptyReport}_`;
   return [
     `| ${headers.join(" | ")} |`,
     `| ${headers.map(() => "---").join(" | ")} |`,
@@ -250,7 +248,7 @@ export function renderBehavior(
 ) {
   const overall = stats.overall;
   return [
-    `# ${heading(range)}: behaviour`,
+    `# ${heading(range)}: behavior`,
     "",
     `- user messages: ${overall.messages} (${formatTokens(overall.words)} words, ${formatTokens(overall.chars)} chars)`,
     `- frustration signals per 100 messages: ${overall.frustrationRate.toFixed(1)}`,

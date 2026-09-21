@@ -18,6 +18,7 @@ import {
 } from "@earendil-works/pi-tui";
 import { Cause, Effect, Exit } from "effect";
 import { Type, type Static } from "typebox";
+import { glyphs, BOX, hint, marker, writeOwn } from "../shared/style.ts";
 import {
   ASK_USER_PARAMETER_DESCRIPTIONS,
   ASK_USER_PROMPT_GUIDELINES,
@@ -263,7 +264,9 @@ export default function askUser(pi: ExtensionAPI) {
             add(
               theme.fg(
                 "accent",
-                `─${title}${"─".repeat(Math.max(0, width - title.length - 1))}`,
+                `${BOX.tl}${title}${BOX.h.repeat(
+                  Math.max(0, width - title.length - 1),
+                )}${BOX.tr}`,
               ),
             );
             for (const line of wrapText(
@@ -277,9 +280,11 @@ export default function askUser(pi: ExtensionAPI) {
             for (let i = 0; i < allOptions.length; i++) {
               const opt = allOptions[i];
               const selected = i === optionIndex;
-              const prefix = selected ? theme.fg("accent", " ❯ ") : "   ";
-              const marker = opt.isOther ? "✎" : `${i + 1}.`;
-              const label = `${marker} ${opt.label}`;
+              const prefix = selected
+                ? theme.fg("accent", ` ${marker}`)
+                : "   ";
+              const optMark = opt.isOther ? writeOwn : `${i + 1}.`;
+              const label = `${optMark} ${opt.label}`;
 
               if (selected || (opt.isOther && editMode)) {
                 add(prefix + theme.fg("accent", label));
@@ -302,16 +307,30 @@ export default function askUser(pi: ExtensionAPI) {
 
             lines.push("");
             if (editMode) {
-              add(theme.fg("dim", " Enter submit • Esc back to options"));
+              add(
+                theme.fg(
+                  "dim",
+                  ` ${hint("enter submit", "esc back to options")}`,
+                ),
+              );
             } else {
               add(
                 theme.fg(
                   "dim",
-                  ` ↑↓ or 1-${allOptions.length} select • Enter confirm • Esc dismiss`,
+                  ` ${hint(
+                    `↑↓ or 1-${allOptions.length} select`,
+                    "enter confirm",
+                    "esc dismiss",
+                  )}`,
                 ),
               );
             }
-            add(theme.fg("accent", "─".repeat(width)));
+            add(
+              theme.fg(
+                "accent",
+                `${BOX.bl}${BOX.h.repeat(width - 2)}${BOX.br}`,
+              ),
+            );
 
             cachedLines = lines;
             return lines;
@@ -393,12 +412,16 @@ export default function askUser(pi: ExtensionAPI) {
       }
 
       if (details.cancelled || details.answer === null) {
-        return new Text(theme.fg("warning", "✗ dismissed"), 0, 0);
+        return new Text(
+          theme.fg("warning", `${glyphs.failed} dismissed`),
+          0,
+          0,
+        );
       }
 
       if (details.wasCustom) {
         return new Text(
-          theme.fg("success", "✓ ") +
+          theme.fg("success", `${glyphs.done} `) +
             theme.fg("muted", "(wrote) ") +
             theme.fg("accent", details.answer),
           0,
@@ -409,7 +432,7 @@ export default function askUser(pi: ExtensionAPI) {
       const idx = details.options.indexOf(details.answer) + 1;
       const display = idx > 0 ? `${idx}. ${details.answer}` : details.answer;
       return new Text(
-        theme.fg("success", "✓ ") + theme.fg("accent", display),
+        theme.fg("success", `${glyphs.done} `) + theme.fg("accent", display),
         0,
         0,
       );

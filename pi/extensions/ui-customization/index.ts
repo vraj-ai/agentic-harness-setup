@@ -21,6 +21,7 @@ import {
   isSubagentSummary,
   type SubagentSummary,
 } from "../shared/workflow-state.ts";
+import { fmtTokens, glyphs } from "../shared/style.ts";
 import { columns, renderFooter } from "./footer.ts";
 import { pickWhimsy, renderWhimsy, type WhimsyLine } from "./whimsy.ts";
 import {
@@ -34,12 +35,6 @@ const RESERVED_ROWS = 6;
 
 type Activity = "idle" | "working" | "done" | "error";
 
-function formatTokens(tokens: number) {
-  if (tokens < 1_000) return `${tokens}`;
-  if (tokens < 1_000_000) return `${Math.round(tokens / 1_000)}k`;
-  return `${(tokens / 1_000_000).toFixed(1)}m`;
-}
-
 function formatDirectory(cwd: string) {
   const home = homedir();
   if (cwd === home) return "~";
@@ -49,12 +44,12 @@ function formatDirectory(cwd: string) {
 function titleFor(ctx: ExtensionContext, activity: Activity) {
   const glyph =
     activity === "working"
-      ? "·"
+      ? glyphs.running
       : activity === "error"
-        ? "×"
+        ? glyphs.failed
         : activity === "done"
-          ? "✓"
-          : "?";
+          ? glyphs.done
+          : glyphs.idle;
   return `${glyph} π ${formatDirectory(ctx.cwd)}`;
 }
 
@@ -122,7 +117,7 @@ export default function uiCustomization(pi: ExtensionAPI) {
               ? "?"
               : `${Math.round(modelInfo.contextPercent)}%`;
           const contextWindow = modelInfo.contextWindow
-            ? formatTokens(modelInfo.contextWindow)
+            ? fmtTokens(modelInfo.contextWindow)
             : "?";
           const tps =
             modelInfo.tokensPerSecond === null
