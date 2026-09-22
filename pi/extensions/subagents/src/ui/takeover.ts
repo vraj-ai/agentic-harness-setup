@@ -18,7 +18,8 @@ import {
   type SubagentSnapshot,
   type SubagentStatus,
 } from "../domain.ts";
-import { formatContextUtilization } from "../format.ts";
+import { formatContextUtilization } from "../../../shared/context-utilization.ts";
+import { glyphOf, marker } from "../../../shared/style.ts";
 import type { SubagentReadModel } from "../manager.ts";
 import { buildTranscriptLines, sanitizeText } from "./transcript.ts";
 
@@ -30,14 +31,14 @@ function configuredKeys(
 }
 
 function statusGlyph(snap: SubagentSnapshot, theme: Theme): string {
-  switch (snap.status) {
-    case "running":
-      return theme.fg("warning", "■");
-    case "done":
-      return theme.fg("success", "■");
-    case "error":
-      return theme.fg("error", "■");
-  }
+  const color =
+    snap.status === "done"
+      ? "success"
+      : snap.status === "error"
+        ? "error"
+        : "warning";
+  const glyph = glyphOf(snap.status === "error" ? "failed" : snap.status);
+  return theme.fg(color, glyph);
 }
 
 function statusWord(snap: SubagentSnapshot, theme: Theme): string {
@@ -438,12 +439,12 @@ class SubagentDashboard implements Component {
       const index = start + i;
       const isSelected = index === this.selection.index;
 
-      // Left: marker, status square, title, dim id
-      const marker = isSelected ? theme.fg("accent", "❯") : " ";
+      // Left: marker, status glyph, title, dim id
+      const rowMark = isSelected ? theme.fg("accent", marker) : " ";
       const title = isSelected
         ? theme.fg("accent", safeDisplayLine(snap.title))
         : theme.fg("text", safeDisplayLine(snap.title));
-      const left = ` ${marker} ${statusGlyph(snap, theme)} ${title} ${theme.fg("dim", safeDisplayLine(snap.id))}`;
+      const left = ` ${rowMark} ${statusGlyph(snap, theme)} ${title} ${theme.fg("dim", safeDisplayLine(snap.id))}`;
 
       // Right: backend · model · context utilization · elapsed · status
       const utilization = formatContextUtilization(snap.usage);

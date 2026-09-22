@@ -1,4 +1,5 @@
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import { glyphOf } from "../shared/style.ts";
 
 const DEFAULT_MAX_LINES = 40;
 const DEFAULT_WIDTH = 80;
@@ -99,10 +100,7 @@ function ruleLine(width: number) {
 }
 
 function agentGlyph(status: unknown) {
-  if (status === "running") return "◉";
-  if (status === "done") return "✓";
-  if (status === "error") return "×";
-  return "·";
+  return glyphOf(status === "error" ? "failed" : String(status ?? ""));
 }
 
 function formatElapsed(ms: number) {

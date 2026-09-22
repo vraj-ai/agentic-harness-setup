@@ -7,6 +7,7 @@ import {
   visibleWidth,
 } from "@earendil-works/pi-tui";
 import { Effect } from "effect";
+import { BOX, hint, marker } from "../../shared/style.ts";
 import { runCommand } from "./process.ts";
 
 const DIFF_SCROLL_STEP = 5;
@@ -231,14 +232,14 @@ export async function showChangedFiles(
       }
 
       function border(width: number, label: string, top: boolean) {
-        const left = top ? "┌" : "└";
-        const right = top ? "┐" : "┘";
-        const text = `─ ${label} `;
+        const left = top ? BOX.tl : BOX.bl;
+        const right = top ? BOX.tr : BOX.br;
+        const text = `${BOX.h} ${label} `;
         const remaining = Math.max(0, width - visibleWidth(text) - 2);
         return theme.fg(
           "borderAccent",
           truncateToWidth(
-            `${left}${text}${"─".repeat(remaining)}${right}`,
+            `${left}${text}${BOX.h.repeat(remaining)}${right}`,
             width,
             "",
           ),
@@ -332,7 +333,9 @@ export async function showChangedFiles(
         );
         const diffWidth = Math.max(1, width - sidebarWidth - 3);
         const selectedFile = files[selectedIndex]!;
-        const title = `local changes · ${files.length} ${files.length === 1 ? "file" : "files"} · ${focus === "files" ? "FILES" : "DIFF"}`;
+        const title = `local changes · ${files.length} ${files.length === 1 ? "file" : "files"} · ${
+          focus === "files" ? "files" : "diff"
+        }`;
         const lines = [border(width, title, true)];
 
         for (let row = 0; row < height; row += 1) {
@@ -343,7 +346,7 @@ export async function showChangedFiles(
           if (file) {
             const isSelected = fileIndex === selectedIndex;
             if (row % 2 === 0) {
-              const marker = isSelected ? "› " : "  ";
+              const rowMark = isSelected ? marker : "  ";
               const isBinary =
                 file.additions === null || file.deletions === null;
               const stats = isBinary
@@ -354,19 +357,19 @@ export async function showChangedFiles(
                 : `${theme.fg("success", `+${file.additions}`)} ${theme.fg("error", `-${file.deletions}`)}`;
               const nameWidth = Math.max(
                 1,
-                sidebarWidth - visibleWidth(marker) - visibleWidth(stats) - 1,
+                sidebarWidth - visibleWidth(rowMark) - visibleWidth(stats) - 1,
               );
               const name = truncateToWidth(file.name, nameWidth, "…");
               const gap = " ".repeat(
                 Math.max(
                   1,
                   sidebarWidth -
-                    visibleWidth(marker) -
+                    visibleWidth(rowMark) -
                     visibleWidth(name) -
                     visibleWidth(stats),
                 ),
               );
-              sidebar = `${marker}${name}${gap}${styledStats}`;
+              sidebar = `${rowMark}${name}${gap}${styledStats}`;
             } else {
               sidebar = `  ${theme.fg("dim", truncateToWidth(file.path, Math.max(1, sidebarWidth - 2), "…"))}`;
             }
@@ -387,19 +390,24 @@ export async function showChangedFiles(
             diffLine === undefined ? "" : styleDiffLine(diffLine),
             diffWidth,
           );
-          const separator = theme.fg(
+          const rail = theme.fg(
             focus === "diff" ? "borderAccent" : "borderMuted",
-            "│",
+            BOX.v,
           );
           lines.push(
-            `${theme.fg("borderMuted", "│")}${sidebar}${separator}${diff}${theme.fg("borderMuted", "│")}`,
+            `${theme.fg("borderMuted", BOX.v)}${sidebar}${rail}${diff}${theme.fg("borderMuted", BOX.v)}`,
           );
         }
 
         const help =
           focus === "files"
-            ? "j/k or ↑/↓ select · enter/space/l open diff · esc close"
-            : "j/k or ↑/↓ scroll · ctrl-d/u page · g/G top/bottom · esc/h files";
+            ? hint("j/k or ↑/↓ select", "enter/space/l open diff", "esc close")
+            : hint(
+                "j/k or ↑/↓ scroll",
+                "ctrl-d/u page",
+                "g/G top/bottom",
+                "esc/h files",
+              );
         lines.push(border(width, help, false));
         return lines;
       }

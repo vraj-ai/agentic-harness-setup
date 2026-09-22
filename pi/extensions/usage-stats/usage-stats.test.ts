@@ -8,7 +8,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
   behavior,
@@ -29,6 +30,7 @@ import {
   type StatsContext,
 } from "./src/api.ts";
 import { DASHBOARD_SECTIONS, dashboardHtml } from "./src/client.ts";
+import { dashboardTokens } from "./src/dashboard-tokens.ts";
 import { StatsDatabase } from "./src/db.ts";
 import { aggregateGain, readGainLog, recordGain } from "./src/gain.ts";
 import {
@@ -377,7 +379,7 @@ test("an implausible gap is reported as unknown latency, not a 12-hour request",
   assert.equal(parsed.messages[0].durationMs, null);
 });
 
-test("behavioural signals fire on the phrases people actually type", () => {
+test("behavioral signals fire on the phrases people actually type", () => {
   const upset = analyzeUserText(
     "NO THAT IS WRONG. you didn't read it. like i said, ugh",
   );
@@ -622,7 +624,7 @@ test("tool shares split the invoking turn's usage and stay additive", () => {
   }
 });
 
-test("behaviour, costs, projects, requests, and errors all report", () => {
+test("behavior, costs, projects, requests, and errors all report", () => {
   const { home } = makeAgentHome();
   try {
     const context = openTestContext(home);
@@ -958,15 +960,19 @@ test("every markdown view renders with real data and says what is derived", () =
 });
 
 test("empty data renders without throwing", () => {
+  const tokens = dashboardTokens(makeAgentHome().agentDir);
   const home = mkdtempSync(join(tmpdir(), "pi-usage-empty-"));
   try {
     const context = openTestContext(home);
     runSync(context);
     assert.match(
       renderOverview(overview(context, "all"), "all"),
-      /no data in range/,
+      /no data in this range/,
     );
-    assert.match(renderTools(tools(context, "all"), "all"), /no data in range/);
+    assert.match(
+      renderTools(tools(context, "all"), "all"),
+      /no data in this range/,
+    );
     assert.equal(status(context).indexedMessages, 0);
     context.db.close();
   } finally {
@@ -1086,8 +1092,40 @@ test("range parsing rejects junk", () => {
 });
 
 test("the dashboard html declares no remote assets", () => {
-  const html = dashboardHtml();
+  const html = dashboardHtml(dashboardTokens(makeAgentHome().agentDir));
   assert.match(html, /<!doctype html>/);
   assert.ok(html.includes("PI Usage Statistics"));
   assert.doesNotMatch(html, /cdn|unpkg|jsdelivr|googleapis/i);
+});
+
+test("dashboard tokens follow the active theme file", () => {
+  const shipped = join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "..",
+    "themes",
+  );
+  const { agentDir } = makeAgentHome();
+  mkdirSync(join(agentDir, "themes"), { recursive: true });
+  writeFileSync(
+    join(agentDir, "themes", "vraj-ink.json"),
+    readFileSync(join(shipped, "vraj-ink.json"), "utf8"),
+  );
+  writeFileSync(
+    join(agentDir, "settings.json"),
+    JSON.stringify({ theme: "vraj-ink" }),
+    "utf8",
+  );
+
+  const tokens = dashboardTokens(agentDir);
+  assert.equal(tokens.bg, "#000000");
+  assert.notEqual(tokens.bg, "#00131f");
+  assert.equal(dashboardTokens(makeAgentHome().agentDir).bg, "#00131f");
+});
+
+test("the served dashboard styles itself from those tokens", () => {
+  const html = dashboardHtml(dashboardTokens(makeAgentHome().agentDir));
+  assert.ok(html.includes("--bg: #00131f"));
+  assert.ok(html.includes("no data in this range"));
+  assert.doesNotMatch(html, /No data in this range/);
 });

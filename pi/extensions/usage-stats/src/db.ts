@@ -749,7 +749,7 @@ export class StatsDatabase {
     }));
   }
 
-  // --- behaviour -----------------------------------------------------------
+  // --- behavior -----------------------------------------------------------
 
   behaviorOverall(cutoff: number | null): BehaviorOverallStats {
     const row = this.#db

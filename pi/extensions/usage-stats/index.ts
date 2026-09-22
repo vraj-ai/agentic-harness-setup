@@ -218,7 +218,7 @@ export default function usageStats(
     name: "usage_stats",
     label: "Usage Statistics",
     description:
-      "Read this machine's local pi usage statistics as Markdown: cost, tokens, models, providers, tools, projects, errors, user-behaviour signals, saved tokens, and subscription-limit windows. Data comes from the local session logs only - nothing is sent anywhere. Use it to answer questions about spend, which model or tool is expensive, error rates, or how much a project has cost.",
+      "Read this machine's local pi usage statistics as Markdown: cost, tokens, models, providers, tools, projects, errors, user-behavior signals, saved tokens, and subscription-limit windows. Data comes from the local session logs only - nothing is sent anywhere. Use it to answer questions about spend, which model or tool is expensive, error rates, or how much a project has cost.",
     promptSnippet:
       "Read local pi usage statistics (cost, tokens, models, tools)",
     promptGuidelines: [

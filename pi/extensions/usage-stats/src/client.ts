@@ -29,12 +29,15 @@ const SECTIONS = [
 
 export const DASHBOARD_SECTIONS = SECTIONS.map(([id]) => id);
 
-const STYLE = `
+import { type DashboardTokens } from "./dashboard-tokens.ts";
+
+function themeCss(tokens: DashboardTokens) {
+  return `
 :root {
   color-scheme: dark;
-  --bg: #00131f; --panel: #001a2b; --surface: #002236; --border: #0d3a55;
-  --text: #e8f4ff; --muted: #7fa6c4; --dim: #4d738f;
-  --accent: #39d7ff; --cobalt: #0f7fd4; --mint: #3ce6b0; --amber: #ffc763; --red: #ff5d6e;
+  --bg: ${tokens.bg}; --panel: ${tokens.panel}; --surface: ${tokens.surface}; --border: ${tokens.border};
+  --text: ${tokens.text}; --muted: ${tokens.muted}; --dim: ${tokens.dim};
+  --accent: ${tokens.accent}; --cobalt: ${tokens.cobalt}; --mint: ${tokens.mint}; --amber: ${tokens.amber}; --red: ${tokens.red};
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text);
@@ -73,8 +76,8 @@ tbody tr:hover { background: var(--surface); }
 .note-line { color: var(--dim); font-size: 12px; margin: 6px 0 10px; }
 svg { display: block; width: 100%; height: 140px; background: var(--panel);
   border: 1px solid var(--border); border-radius: 6px; }
-#status { margin-left: auto; color: var(--dim); font-size: 12px; }
-`;
+#status { margin-left: auto; color: var(--dim); font-size: 12px; }`;
+}
 
 /**
  * The whole client. Written as a string rather than a bundled module so the
@@ -121,7 +124,7 @@ function card(label, value, note) {
 }
 
 function table(headers, rows) {
-  if (!rows.length) return $("div", { class: "empty", text: "No data in this range." });
+  if (!rows.length) return $("div", { class: "empty", text: "no data in this range" });
   const thead = $("thead", {}, $("tr", {}, headers.map(h => $("th", { text: h }))));
   const tbody = $("tbody", {}, rows.map(cells =>
     $("tr", {}, cells.map(cell =>
@@ -131,7 +134,7 @@ function table(headers, rows) {
 
 /** Minimal inline sparkline/bar chart: enough to see shape, no dependency. */
 function chart(points, valueOf, labelOf) {
-  if (!points.length) return $("div", { class: "empty", text: "No data in this range." });
+  if (!points.length) return $("div", { class: "empty", text: "no data in this range" });
   const values = points.map(valueOf);
   const max = Math.max(...values, 1);
   const width = 1000, height = 140, pad = 8;
@@ -399,14 +402,14 @@ function boot() {
 boot();
 `;
 
-export function dashboardHtml() {
+export function dashboardHtml(tokens: DashboardTokens) {
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PI Usage Statistics</title>
-<style>${STYLE}</style>
+<style>${themeCss(tokens)}</style>
 </head>
 <body>
 <main></main>

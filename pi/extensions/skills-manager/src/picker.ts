@@ -13,6 +13,7 @@ import {
   type DiscoveredSkill,
   type SkillScope,
 } from "./discovery.ts";
+import { separator } from "../../shared/style.ts";
 
 export const DONE_LABEL = "Done";
 
@@ -57,7 +58,9 @@ export function buildRows(
     for (const skill of group) {
       const enabled = !disabled.has(skill.name);
       const label = `  [${enabled ? "x" : " "}] ${skill.name}${
-        skill.description ? ` - ${truncate(skill.description, 60)}` : ""
+        skill.description
+          ? `${separator}${truncate(skill.description, 60)}`
+          : ""
       }`;
       labels.push(label);
       byLabel.set(label, { label, name: skill.name, scope, enabled });

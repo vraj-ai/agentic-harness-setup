@@ -56,10 +56,9 @@ import {
   REASONING_EFFORTS,
   type SubagentSnapshot,
 } from "./src/domain.ts";
-import {
-  formatActivityStatus,
-  formatContextUtilization,
-} from "./src/format.ts";
+import { formatActivityStatus } from "../shared/activity-status.ts";
+import { formatContextUtilization } from "../shared/context-utilization.ts";
+import { glyphs } from "../shared/style.ts";
 import {
   SubagentManager,
   type SubagentManagerShape,
@@ -396,7 +395,7 @@ export default function (pi: ExtensionAPI) {
     const done = subs.length - running - failed;
     ui.setStatus(
       "subagents",
-      formatActivityStatus(ui.theme, { running, done, failed }),
+      formatActivityStatus(ui.theme, "subagents", { running, done, failed }),
     );
   };
 
@@ -866,7 +865,9 @@ export default function (pi: ExtensionAPI) {
         status?: string;
       };
       const failed = details.status === "error";
-      const icon = failed ? theme.fg("error", "x") : theme.fg("success", "■");
+      const icon = failed
+        ? theme.fg("error", glyphs.failed)
+        : theme.fg("success", glyphs.done);
       const header =
         `${icon} ` +
         theme.fg("accent", theme.bold(`subagent ${details.id ?? "?"}`)) +
@@ -911,7 +912,9 @@ export default function (pi: ExtensionAPI) {
     (entry, { expanded }, theme) => {
       const data = entry.data;
       const failed = data?.status === "error";
-      const icon = failed ? theme.fg("error", "x") : theme.fg("success", "■");
+      const icon = failed
+        ? theme.fg("error", glyphs.failed)
+        : theme.fg("success", glyphs.done);
       const header =
         `${icon} ` +
         theme.fg("accent", theme.bold(`by the way · ${data?.title ?? "?"}`)) +

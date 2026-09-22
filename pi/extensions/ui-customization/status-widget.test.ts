@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { visibleWidth } from "@earendil-works/pi-tui";
 import uiCustomization from "./index.ts";
+import { glyphs } from "../shared/style.ts";
 import {
   layoutColumns,
   normalizeMaxLines,
@@ -48,7 +49,7 @@ test("agent rows render glyph, label, elapsed, turns, and ctx", () => {
     state({ agents: [agent()], now: 106_000, width: 120 }),
   );
   const line = result.find((row) => row.includes("look around")) ?? "";
-  assert.match(line, /◉/);
+  assert.match(line, new RegExp(glyphs.running));
   assert.match(line, /look around/);
   assert.match(line, /pi\/sol/);
   assert.match(line, /6s/);

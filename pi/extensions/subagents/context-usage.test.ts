@@ -3,7 +3,10 @@ import test from "node:test";
 import { renderFooter } from "../ui-customization/footer.ts";
 import { contextOccupancyTokens } from "./src/backends/claude.ts";
 import { parseThreadTokenUsage } from "./src/backends/codex.ts";
-import { contextPercent, formatContextUtilization } from "./src/format.ts";
+import {
+  contextPercent,
+  formatContextUtilization,
+} from "../shared/context-utilization.ts";
 
 // --- Claude: per-request occupancy, never the run aggregate ------------------
 
