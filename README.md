@@ -109,6 +109,22 @@ See `prime-agent/extensions/subagent/README.md`.
 Prime Agent still ships the older council/contributor set. omp is the author's
 client for `/grill` → `/issues` → `/ship` or `/goals` → `/snapshot`.
 
+## Session hierarchy
+
+Sessions run in Herdr in three tiers. Subagent depth is capped at 1.
+
+| Tier | Model | Count | Job |
+|---|---|---|---|
+| Higher-up (`orchestrator`) | Opus 5.5, high | one | The only session the user talks to. Status, decisions needed, what to understand. Does not implement. |
+| Repo orchestrator | Sonnet 5.5, high or xhigh | one per repo, each in its own named herdr tab | Plans, drives workers, reviews, runs gates, pushes, opens PRs, merges. Never spawns; asks the higher-up for more workers. |
+| Workers | cheap models the user names per run | as many `pi` and Devin sessions as needed | Build on their own branch or worktree. Never push, merge, or spawn. The orchestrator relays results between workers. |
+
+The omp Worker Roles above (`researcher`, `builder`, `reviewer`, `adversary`,
+`small-task`) are the jobs workers do. No file here pins a worker model. Drive a
+worker with `herdr agent prompt <name> "<brief ending in BUILD-DONE>"` and read
+it with `herdr agent read <name> --source recent-unwrapped --lines 60`. The
+decision record is `CONTEXT/architecture.md` in vraj-ai/fleet.
+
 ## Notes
 
 - No secrets. Keys stay in local auth stores.
