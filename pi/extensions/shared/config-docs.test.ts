@@ -51,7 +51,8 @@ test("SYSTEM.md keeps the picker as open-view-only with explicit in-view send (P
 
 test("settings document Pi's accepted steering values and describe direct-only operation", () => {
   const runtime = readFileSync(runtimeSettings, "utf8");
-  assert.match(runtime, /`steeringMode`[\s\S]*`"all"` or `"one-at-a-time"`/);
+  // SDK 1.0.0 moved the values into a single table cell; match both wordings.
+  assert.match(runtime, /`steeringMode`[\s\S]*"all"[\s\S]*"one-at-a-time"/);
   assert.equal(readSettings(settingsExample).steeringMode, "one-at-a-time");
   assert.equal(readSettings(settingsExample).packages, undefined);
   assert.equal(readSettings(settingsExample).workflow, undefined);
