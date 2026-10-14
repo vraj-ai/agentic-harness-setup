@@ -122,7 +122,11 @@ fi
 if [ "$drift" -eq 0 ]; then
   echo "In sync."
 else
-  echo "Drift found${missing:+ ($missing path(s) missing in the mirror)}."
+  if [ "$missing" -gt 0 ]; then
+    echo "Drift found ($missing path(s) missing in the mirror)."
+  else
+    echo "Drift found."
+  fi
   echo "Run scripts/mirror-sync.sh to copy the canonical package over."
 fi
 exit "$drift"

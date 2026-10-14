@@ -23,7 +23,14 @@ DELETE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --mirror) MIRROR="${2:-}"; shift 2 ;;
+    --mirror)
+      if [ $# -lt 2 ] || [ -z "${2:-}" ]; then
+        echo "--mirror needs a path" >&2
+        exit 2
+      fi
+      MIRROR="$2"
+      shift 2
+      ;;
     --dry-run) DRY_RUN=1; shift ;;
     --delete) DELETE=1; shift ;;
     -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
