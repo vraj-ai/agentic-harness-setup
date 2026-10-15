@@ -1,4 +1,3 @@
-
 # OS
 .DS_Store
 Thumbs.db
@@ -16,3 +15,6 @@ secrets/
 # pi setup deps
 pi/**/node_modules/
 pi/package-lock.json
+
+# verify-skill proof. The PR body carries the run log; cleanup must not delete it.
+artifacts/

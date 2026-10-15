@@ -59,4 +59,22 @@ case "$output" in
     ;;
 esac
 
+set +e
+output="$("$SYNC" --mirror 2>&1)"
+status=$?
+set -e
+if [ "$status" -eq 0 ]; then
+  echo "mirror-sync.sh accepted --mirror without a path" >&2
+  echo "$output" >&2
+  exit 1
+fi
+case "$output" in
+  *"--mirror needs a path"*) ;;
+  *)
+    echo "mirror-sync.sh did not explain a missing --mirror path" >&2
+    echo "$output" >&2
+    exit 1
+    ;;
+esac
+
 echo "mirror script tests ok"

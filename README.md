@@ -2,34 +2,43 @@
 
 Versioned machine harness for the coding agents on this account. It snapshots
 the **omp Roles**, **OpenCode** profiles, and the **Prime Agent** `@`-mention
-harness, plus sync scripts so live installs stay aligned with
-[vraj-ai/skills](https://github.com/vraj-ai/skills).
+harness, plus the **Pi** tree (`pi/`, formerly `vraj-ai/Pi-Setup`). Sync scripts
+keep live installs aligned with [vraj-ai/skills](https://github.com/vraj-ai/skills).
 
-Current version: **0.3.0** (see [`VERSION`](VERSION)).
+Current version: **0.4.1** (see [`VERSION`](VERSION)).
 
-Skills stay portable. This repo is the machine overlay: Role files, OpenCode
-agents, Prime Agent extensions. Workflow skills themselves live in `vskills`.
+Skills stay portable. This repo is the machine overlay. Workflow skills live in
+`vraj-ai/skills`. Agents start at [`AGENTS.md`](AGENTS.md). The operating stack
+and the decisions behind it are in [`CONTEXT/architecture.md`](CONTEXT/architecture.md).
+
+Self-merge is off (fleet ADR 0003).
 
 ## Layout
 
 ```
 agentic-harness-setup/
 ├── VERSION
+├── AGENTS.md
+├── CONTEXT/                 # why: architecture and glossary. No progress file.
 ├── README.md
-├── omp/agent/              # Invocation + Worker Role templates
-├── opencode/               # OpenCode agents + slash commands
+├── omp/agent/               # Invocation + Worker Role templates
+├── opencode/                # OpenCode agents + slash commands
 │   ├── agent/
 │   └── command/
-├── claude-code/agents/
-├── prime-agent/            # Prime Agent @-mention harness
+├── prime-agent/             # Prime Agent @-mention harness -> ~/.prime/agent
 │   ├── extensions/subagent/
 │   ├── agents/
 │   └── prompts/
-├── pi/                     # folded Prime Agent (Pi-Setup) tree
+├── pi/                      # Pi config -> ~/.pi/agent via pi/install.sh
 └── scripts/
-    ├── sync.sh             # repo -> live installs
-    └── capture.sh          # skills/live -> repo
+    ├── sync.sh              # repo -> live installs
+    ├── capture.sh           # skills/live -> repo
+    ├── mirror-check.sh      # drift vs a vraj-ai/pi clone (read-only)
+    └── mirror-sync.sh       # copy pi/ into that clone; never commits
 ```
+
+`.cursor/skills/verify-agentic-harness-setup/` is the verification skill. It is
+not copied by `sync.sh`.
 
 ## omp Roles
 
@@ -56,11 +65,15 @@ the same after it asks which harness you are on.
 
 Profiles live here under `opencode/`, matching `vraj-ai/skills`
 `harness/opencode/`. `sync.sh` installs them to `~/.config/opencode/` (or
-`$OPENCODE_CONFIG_DIR`), not into a top-level `skills/opencode/` tree. That
-path is gone.
+`$OPENCODE_CONFIG_DIR`).
 
 Included: `goals`, `council`, contributor, cost-aware Gemini/DeepSeek, council
 members, adversary, `/goal`.
+
+Profiles that pin OpenCode Go: `contributor` and `council-glm`
+(`opencode-go/glm-5.2`), `council-grok` and `council-adversary`
+(`opencode-go/grok-4.5`). The other council profiles pin OpenRouter or
+`openai/gpt-5.6-sol`. `goals` and `council` do not pin a model.
 
 ## Keep it up to date
 
@@ -81,7 +94,7 @@ This repo versions the snapshot and deploys it.
   - `prime-agent/agents` → `~/.prime/agent/agents`
   - `prime-agent/prompts` → `~/.prime/agent/prompts`
 
-  Restart omp, OpenCode, or Prime Agent (`/reload`).
+  It does not install `pi/`. Restart omp, OpenCode, or Prime Agent (`/reload`).
 
 - **Skills or live → repo** (before you commit):
 
@@ -90,6 +103,14 @@ This repo versions the snapshot and deploys it.
   ```
 
   Prefers `~/Work/skills/harness/` when it exists, else the live config dirs.
+  This writes into the repo that contains the script.
+
+- **Pi mirror** (`github.com/vraj-ai/pi`):
+
+  ```bash
+  ./scripts/mirror-check.sh --mirror <clone>
+  ./scripts/mirror-sync.sh --mirror <clone>    # copies files; does not commit or push
+  ```
 
 ### Versioning
 
@@ -106,33 +127,35 @@ Installed via `~/.prime/agent/extensions/subagent`:
 
 See `prime-agent/extensions/subagent/README.md`.
 
-Prime Agent still ships the older council/contributor set. omp is the author's
-client for `/grill` → `/issues` → `/ship` or `/goals` → `/snapshot`.
+omp is the client for `/grill` → `/issues` → `/ship`, or `/goals` → `/snapshot`.
+Inside `ship`, multi-module work, a design fork, or an unknown cause runs
+pstack poteto-mode (understand → design → build → verify → interrogate → ship).
 
-## Session hierarchy
+## Current stack
 
-Sessions run in Herdr in three tiers. Subagent depth is capped at 1.
+Herdr fans out to Claude Code and pi, both on OpenCode Go. The other lanes are
+the Devin CLI, Cursor cloud agents, and T3 Code with t3-pstack. pstack is set
+up in Cursor with `/setup-pstack`. Details, including what this repo does not
+install, are in [`CONTEXT/architecture.md`](CONTEXT/architecture.md).
 
-| Tier | Model | Count | Job |
-|---|---|---|---|
-| Higher-up (`orchestrator`) | Opus 5.5, high | one | The only session the user talks to. Status, decisions needed, what to understand. Does not implement. |
-| Repo pair | Sonnet 5.5, high or xhigh (chat) + GPT-6 Sol (`pi`, provider `openai-codex`) | two peers per repo, each in its own named herdr tab | Same league. Split lanes (more to codex), own a lane end to end, cross-review before merging. Neither spawns; they ask the higher-up. |
-| Cheap workers | models the user names per run | Devin and muse `pi` sessions as needed | Build on their own branch or worktree. Never push, merge, or spawn. |
+## Pi
 
-The omp Worker Roles above (`researcher`, `builder`, `reviewer`, `adversary`,
-`small-task`) are the jobs workers do. No file here pins a worker model. Peers
-talk with `herdr agent prompt <peer> "<message>"` and
-`herdr agent read <peer> --source recent-unwrapped --lines 60`; a worker brief
-ends in `BUILD-DONE`. One git writer per branch. The decision record is
-`CONTEXT/architecture.md` in vraj-ai/fleet.
+`pi/` installs into `~/.pi/agent` with `pi/install.sh`. See `pi/README.md` and
+`pi/SETUP.md`. Its in-session Herdr extension (`pi/extensions/subagents`) is a
+read-only subagent fleet. That is separate from the Herdr session fan-out above.
+`pi/settings.example.json` still defaults to `openai-codex` / `gpt-5.6-sol`.
+
+## Verify
+
+```bash
+.cursor/skills/verify-agentic-harness-setup/verify.sh all
+```
+
+The run uses a disposable `HOME` and a temporary mirror. It does not write to
+the real home directory or commit the pi mirror.
 
 ## Notes
 
 - No secrets. Keys stay in local auth stores.
 - Do not treat `smol` / `task` / `advisor` as worker identities. Those are omp
   model aliases. Spawn the named Worker Roles instead.
-
-## Consolidated Prime Agent (pi) setup
-
-`pi/` is the full Prime Agent configuration previously hosted as
-`vraj-ai/Pi-Setup`. See `pi/README.md` and `pi/SETUP.md`.
