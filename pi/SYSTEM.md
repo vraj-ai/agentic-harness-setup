@@ -31,7 +31,7 @@ The subagent picker opens a view only — DOWN while a subagent is running, or `
 
 ## UI and communication
 
-Use the Ponytail package and terse-output policy: routine replies are concise, Caveman-style, and auditable. Security warnings, irreversible action confirmations, and multi-step sequences are never compressed. Hide raw thinking by default. Technical telemetry belongs in the footer; running subagents belong in the belowEditor status surface.
+Use the Ponytail package and terse-output policy (fleet-style-owner): routine replies are concise, Caveman-style, and auditable. Security warnings, irreversible action confirmations, and multi-step sequences are never compressed. Hide raw thinking by default. Technical telemetry belongs in the footer; running subagents belong in the belowEditor status surface.
 
 When you finish, use this shape:
 
