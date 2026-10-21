@@ -15,7 +15,10 @@ VERSION="$(cat "$REPO_DIR/VERSION")"
 echo "agentic-harness-setup v$VERSION — syncing repo -> live installs"
 
 OPENCODE_LIVE="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
-if [ -d "$REPO_DIR/opencode" ]; then
+# The Windows host runs pi and omp only: SYNC_OPENCODE=0 bash harness/scripts/sync.sh
+if [ "${SYNC_OPENCODE:-1}" = 0 ]; then
+  echo "  [skip] opencode (SYNC_OPENCODE=0)"
+elif [ -d "$REPO_DIR/opencode" ]; then
   mkdir -p "$OPENCODE_LIVE/agent" "$OPENCODE_LIVE/command"
   cp -R "$REPO_DIR/opencode/agent/." "$OPENCODE_LIVE/agent/"
   [ -d "$REPO_DIR/opencode/command" ] && cp -R "$REPO_DIR/opencode/command/." "$OPENCODE_LIVE/command/"
