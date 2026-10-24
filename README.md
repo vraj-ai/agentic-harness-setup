@@ -5,7 +5,7 @@ the **omp Roles**, **OpenCode** profiles, and the **Prime Agent** `@`-mention
 harness, plus sync scripts so live installs stay aligned with
 [vraj-ai/skills](https://github.com/vraj-ai/skills).
 
-Current version: **0.3.0** (see [`VERSION`](VERSION)).
+Current version: **0.4.0** (see [`VERSION`](VERSION)).
 
 Skills stay portable. This repo is the machine overlay: Role files, OpenCode
 agents, Prime Agent extensions. Workflow skills themselves live in `vskills`.

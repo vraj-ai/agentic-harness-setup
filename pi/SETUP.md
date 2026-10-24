@@ -16,6 +16,21 @@ Windows PowerShell:
 
 Both commands run the same Node installer. By default it installs to `~/.pi/agent` on macOS/Linux and `$HOME\.pi\agent` on Windows. It links resources when possible and copies them when Windows or filesystem policy rejects symlinks.
 
+### Windows: Bash discovery
+
+Pi's `bash` tool probes `C:\Program Files\Git\bin\bash.exe` and the x86
+equivalent. A per-user Git install (`%LOCALAPPDATA%\Programs\Git`) is not found,
+and every `bash` call then fails with `No bash shell found`. Point Pi at the
+binary explicitly in `settings.json`:
+
+```json
+{
+  "shellPath": "C:\\Users\\<user>\\AppData\\Local\\Programs\\Git\\bin\\bash.exe"
+}
+```
+`shellPath` is read at startup, so restart Pi after writing it. `git` itself is
+on `PATH` in either layout; only the shell lookup is path-sensitive.
+
 ## Rolling back an install
 
 The installer is transactional. Every non-dry-run install writes a backup and a
@@ -165,6 +180,30 @@ remote=$(git ls-remote --exit-code origin "$branch" | cut -f1)
 printf 'local:   %s\nfetched: %s\nremote:  %s\n' "$local" "$fetched" "$remote"
 test "$local" = "$fetched" && test "$local" = "$remote"
 ```
+
+## Skill context policy
+
+Which skills appear in `<available_skills>` is a per-machine setting, not a
+property of the skill. The canonical switch is `/skills`, which writes
+`vraj.skills.disabled` in `~/.pi/agent/settings.json`;
+`extensions/skills-manager` strips those skills from the system prompt on the
+next turn while `/skill:<name>` still loads every one of them.
+
+`settings.example.json` carries this machine's list: 82 model-visible (`pstack` +
+`vskills` + `frontend-design`) and 109 human-only. To re-derive it on a new box,
+keep every skill from those three sources out of the array and list everything
+else. `test-tps` stays disabled on purpose — it spends provider quota and is
+meant to be invoked by hand.
+
+### When `skills-manager` is not installed
+
+A pi install driven by npm packages (`~/.pi/agent/npm`) with no
+`~/.pi/extensions` directory gets no `before_agent_start` filter, so the setting
+does nothing there. On those boxes put `disable-model-invocation: true` in the
+skill's `SKILL.md` frontmatter instead: `formatSkillsForPrompt` omits it from the
+prompt and `/skill:name` still works. Keep the two mechanisms listing the same
+names, because pack pulls and `vskills` syncs regenerate frontmatter while
+nothing regenerates `settings.json`.
 
 ## Firecrawl
 

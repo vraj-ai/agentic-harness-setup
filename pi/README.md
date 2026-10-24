@@ -33,6 +33,36 @@ Everything here gets linked (or copied) into `~/.pi/agent` by `./install.sh`:
 
 Runtime state stays outside git: auth, sessions, trust, live settings, downloaded packages, and environment files.
 
+## Skill context policy
+
+Every harness offers the model a skill list in `<available_skills>`, and every
+listed description is paid for on **every** turn. The policy is therefore
+model-visible only by exception:
+
+| Tier | Skills | Reaches the model through |
+| --- | --- | --- |
+| Model-visible | the 57 `pstack` skills, the 25 `vskills`, and Anthropic's `frontend-design` | `<available_skills>` |
+| Human-only | addyosmani pack (25), mattpocock packs (36), the Anthropic document/office skills, and `test-tps` | `/skill:<name>` only — absent from the prompt |
+
+The canonical switch is `/skills`, which writes `vraj.skills.disabled` — a
+sorted array of skill names in `settings.json`.
+`extensions/skills-manager` filters those entries out of `<available_skills>` on
+the next turn, and `/skill:name` still loads the file, which is the deliberate
+escape hatch. `settings.example.json` ships this machine's 109-name list, so a
+fresh install starts from the policy instead of 191 visible skills.
+
+Measured on a 191-skill corpus (2026-10-24): 82 visible / 109 human-only, and
+description payload 33,588 → 21,473 characters, about 3.2k tokens per turn.
+`/context-audit` is the live check.
+
+**Fallback where `skills-manager` is absent.** An npm-package pi install with no
+`~/.pi/extensions` gets no `before_agent_start` filter, so `vraj.skills.disabled`
+is inert there. On those boxes set `disable-model-invocation: true` in the
+skill's `SKILL.md` frontmatter: `formatSkillsForPrompt` omits it from the prompt
+while `/skill:name` keeps working. Keep the hidden names identical either way,
+because pack pulls and `vskills` syncs regenerate frontmatter but nothing
+regenerates `settings.json`.
+
 ## Token savings
 
 | Lever                                                                      | What it actually does                                                                                                                                             |
